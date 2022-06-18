@@ -3,4 +3,4 @@ from .flood_handler import *
 from .listen import *
 
 
-__version__ = "0.1b"
+__version__ = "0.2b"
