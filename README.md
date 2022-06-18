@@ -63,11 +63,13 @@ from pyrogram import Client
 app = Client(...)
 
 # listen for a message in a particular chat
-m = app.listen_msg(chat_id, filters, timeout)
+m = app.listen_message(chat_id, filters, timeout)
 
 # listen for a callback data in a perticular message
-u = app.listen_cdb(chat_id, message_id, filters, timeout)
-u = app.listen_cdb(inline_message_id, filters, timeout)
+u = app.listen_callback(chat_id=chat_id, message_id=message_id, filters=filters, timeout=timeout)
+u = app.listen_callback(inline_message_id=inline_message_id, filters=filters, timout=timeout)
 ```
 
 #### More Comming Soon
+
+##### Special thanks to [Pyromod](https://github.com/usernein/pyromod)
