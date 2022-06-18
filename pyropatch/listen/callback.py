@@ -67,7 +67,7 @@ class Client():
             raise TypeError("chat_id or inline_message_id is required")
         future = loop.create_future()
         future.add_done_callback(
-            functools.partial(self.remove_cbd_listener, key)
+            functools.partial(self.remove_cbd_listener, chat_id, message_id, inline_message_id)
         )
         self.cbd_listeners.update({
             key: {"future": future, "filters": filters}
