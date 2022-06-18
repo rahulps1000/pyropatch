@@ -44,7 +44,7 @@ class Client():
         await self.old_start(*args, **kwargs)
 
     @patchable
-    async def listen_cbd(
+    async def listen_callback(
             self,
             chat_id: Optional[int] = None,
             message_id: Optional[int] = None,
@@ -67,7 +67,7 @@ class Client():
             raise TypeError("chat_id or inline_message_id is required")
         future = loop.create_future()
         future.add_done_callback(
-            functools.partial(self.remove_cbd_listener, chat_id, message_id, inline_message_id)
+            functools.partial(self.remove_callback_listener, chat_id, message_id, inline_message_id)
         )
         self.cbd_listeners.update({
             key: {"future": future, "filters": filters}
@@ -75,12 +75,12 @@ class Client():
         return await asyncio.wait_for(future, timeout)
 
     @patchable
-    async def ask_cbd(self, chat_id, text, reply_markup: pyrogram.types.InlineKeyboardMarkup, filters=None,
+    async def ask_callback(self, chat_id, text, reply_markup: pyrogram.types.InlineKeyboardMarkup, filters=None,
                       timeout=None, *args, **kwargs):
         if not await check_cbd(reply_markup):
             raise NoCallbackException
         request = await self.send_message(chat_id, text, reply_markup=reply_markup, *args, **kwargs)
-        response = await self.listen_cbd(
+        response = await self.listen_callback(
             chat_id=request.chat.id,
             message_id=request.id,
             filters=filters,
@@ -90,12 +90,12 @@ class Client():
         return response
 
     @patchable
-    def remove_cbd_listener(
+    def remove_callback_listener(
             self,
-            future,
             chat_id: Optional[int] = None,
             msg_id: Optional[int] = None,
-            inline_message_id: Optional[str] = None
+            inline_message_id: Optional[str] = None,
+            future = None
     ):
         if chat_id:
             if not msg_id:
@@ -109,7 +109,7 @@ class Client():
             self.cbd_listeners.pop(key, None)
 
     @patchable
-    def cancel_cbd_listener(
+    def cancel_callback_listener(
             self,
             chat_id: Optional[int] = None,
             msg_id: Optional[int] = None,
@@ -127,7 +127,7 @@ class Client():
         if not listener or listener['future'].done():
             return
         listener['future'].set_exception(ListenerCanceled())
-        self.remove_cbd_listener(chat_id, msg_id, inline_message_id, listener['future'])
+        self.remove_callback_listener(chat_id, msg_id, inline_message_id, listener['future'])
 
 
 @patch(pyrogram.handlers.callback_query_handler.CallbackQueryHandler)
@@ -150,7 +150,7 @@ class CallbackQueryHandler():
             listener['future'].set_result(update)
         else:
             if listener and listener['future'].done():
-                client.remove_cbd_listener(
+                client.remove_callback_listener(
                     chat_id=update.message.chat.id if update.message else None,
                     msg_id=update.message.id if update.message else None,
                     inline_message_id=update.inline_message_id,

@@ -16,13 +16,13 @@ pyrogram.errors.ListenerCanceled = ListenerCanceled
 class Client():
 
     @patchable
-    async def listen_msg(self, chat_id, filters=None, timeout=None):
+    async def listen_message(self, chat_id, filters=None, timeout=None):
         if type(chat_id) != int:
             chat = await self.get_chat(chat_id)
             chat_id = chat.id
         future = loop.create_future()
         future.add_done_callback(
-            functools.partial(self.remove_msg_listener, chat_id)
+            functools.partial(self.remove_message_listener, chat_id)
         )
         self.msg_listeners.update({
             chat_id: {"future": future, "filters": filters}
@@ -30,24 +30,24 @@ class Client():
         return await asyncio.wait_for(future, timeout)
 
     @patchable
-    async def ask_msg(self, chat_id, text, filters=None, timeout=None, *args, **kwargs):
+    async def ask_message(self, chat_id, text, filters=None, timeout=None, *args, **kwargs):
         request = await self.send_message(chat_id, text, *args, **kwargs)
-        response = await self.listen_msg(chat_id, filters, timeout)
+        response = await self.listen_message(chat_id, filters, timeout)
         response.request = request
         return response
 
     @patchable
-    def remove_msg_listener(self, chat_id, future):
+    def remove_message_listener(self, chat_id, future):
         if future == self.msg_listeners[chat_id]["future"]:
             self.msg_listeners.pop(chat_id, None)
 
     @patchable
-    def cancel_msg_listener(self, chat_id):
+    def cancel_message_listener(self, chat_id):
         listener = self.msg_listeners.get(chat_id)
         if not listener or listener['future'].done():
             return
         listener['future'].set_exception(ListenerCanceled())
-        self.remove_msg_listener(chat_id, listener['future'])
+        self.remove_message_listener(chat_id, listener['future'])
 
 
 @patch(pyrogram.handlers.message_handler.MessageHandler)
