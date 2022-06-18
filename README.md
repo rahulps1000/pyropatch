@@ -21,7 +21,7 @@ Install pyropatch with pip
 > * Listen
 
 ```python
-import pyropatch                    #import package
+from pyropatch import pyropatch                    #apply all patches
 from pyrogram import Client
 
 app = Client(...)
@@ -29,7 +29,7 @@ app = Client(...)
 
 ### Command Handler
 ```python
-from pyropatch import command_handler                   #import package
+from pyropatch import command_handler                   #apply command handler
 from pyrogram import Client
 
 app = Client(...)
@@ -45,7 +45,7 @@ app.commands
 ```
 ### Flood Handler
 ```python
-from pyropatch import flood_handler                   #import package
+from pyropatch import flood_handler                   #apply flood handler
 from pyrogram import Client
 
 app = Client(...)
@@ -57,11 +57,10 @@ app.send_message("me", "Flood handled with **Pyropatch**!")
 
 ### Listen
 ```python
-from pyropatch import listen                   #import package
+from pyropatch import listen                   #apply listen
 from pyrogram import Client
 
 app = Client(...)
-
 # listen for a message in a particular chat
 m = app.listen_message(chat_id, filters, timeout)
 

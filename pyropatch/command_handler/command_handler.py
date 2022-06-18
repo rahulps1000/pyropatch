@@ -21,7 +21,7 @@ class Client():
         return await self.set_bot_commands(cmd_list)
 
     @patchable
-    def on_message(self, filters, *args, **kwargs):
+    def on_message(self, filters=None, *args, **kwargs):
         cmd_list = get_commands_from_filters(filters)
         if cmd_list:
             for cmd in cmd_list:
