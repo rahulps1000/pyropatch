@@ -66,7 +66,8 @@ app = Client(...)
 m = app.listen_msg(chat_id, filters, timeout)
 
 # listen for a callback data in a perticular message
-u = app.listen_cdb(message, filters, timeout)
+u = app.listen_cdb(chat_id, message_id, filters, timeout)
+u = app.listen_cdb(inline_message_id, filters, timeout)
 ```
 
 #### More Comming Soon
