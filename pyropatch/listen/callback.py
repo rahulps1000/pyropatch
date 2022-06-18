@@ -58,7 +58,7 @@ class Client():
             msg = await self.get_messages(chat_id, message_id)
             if not msg.from_user.is_self:
                 raise NotSelfMessage
-            if not await check_cbd(msg):
+            if not await check_cbd(msg.reply_markup):
                 raise NoCallbackException
             key = f'{chat_id}:{message_id}'
         elif inline_message_id:
