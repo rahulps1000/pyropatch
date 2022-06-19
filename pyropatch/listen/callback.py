@@ -150,7 +150,7 @@ class CallbackQueryHandler():
             listener['future'].set_result(update)
         else:
             if listener and listener['future'].done():
-                client.remove_inline_listener(chat_id=update.message.chat.id if update.message else None,
+                client.remove_result_listener(chat_id=update.message.chat.id if update.message else None,
                                               msg_id=update.message.id if update.message else None,
                                               inline_message_id=update.inline_message_id, future=listener['future'])
             await self.user_callback(client, update, *args)

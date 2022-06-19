@@ -1,7 +1,8 @@
 from .message import *
 from .callback import *
 import pyrogram
-from ..utils import patch2,patchable
+from ..utils import patch2, patchable
+
 
 @patch2(pyrogram.client.Client)
 class Client():
@@ -10,4 +11,5 @@ class Client():
         self.cbd_listeners = {}
         self.msg_listeners = {}
         self.inline_listeners = {}
+        self.result_listeners = {}
         self.old2___init__(*args, **kwargs)
