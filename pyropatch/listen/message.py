@@ -8,9 +8,13 @@ import functools
 
 loop = asyncio.get_event_loop()
 
+
 class ListenerCanceled(Exception):
     pass
+
+
 pyrogram.errors.ListenerCanceled = ListenerCanceled
+
 
 @patch(pyrogram.client.Client)
 class Client():
