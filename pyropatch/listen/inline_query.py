@@ -23,11 +23,6 @@ async def temp(_, __):
 @patch(pyrogram.client.Client)
 class Client():
     @patchable
-    async def start(self, *args, **kwargs):
-        self.add_handler(pyrogram.handlers.InlineQueryHandler(temp))
-        await self.old_start(*args, **kwargs)
-
-    @patchable
     async def listen_inline_query(
             self,
             user_id: int,
