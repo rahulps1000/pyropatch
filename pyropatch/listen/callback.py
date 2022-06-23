@@ -31,18 +31,8 @@ class NotSelfMessage(Exception):
 pyrogram.errors.NotSelfMessage = NotSelfMessage
 
 
-async def temp(_, __):
-    pass
-
-
 @patch(pyrogram.client.Client)
 class Client():
-
-    @patchable
-    async def start(self, *args, **kwargs):
-        self.add_handler(pyrogram.handlers.CallbackQueryHandler(temp))
-        await self.old_start(*args, **kwargs)
-
     @patchable
     async def listen_callback(
             self,
@@ -76,7 +66,7 @@ class Client():
 
     @patchable
     async def ask_callback(self, chat_id, text, reply_markup: pyrogram.types.InlineKeyboardMarkup, filters=None,
-                      timeout=None, *args, **kwargs):
+                           timeout=None, *args, **kwargs):
         if not await check_cbd(reply_markup):
             raise NoCallbackException
         request = await self.send_message(chat_id, text, reply_markup=reply_markup, *args, **kwargs)
@@ -95,7 +85,7 @@ class Client():
             chat_id: Optional[int] = None,
             msg_id: Optional[int] = None,
             inline_message_id: Optional[str] = None,
-            future = None
+            future=None
     ):
         if chat_id:
             if not msg_id:
@@ -150,12 +140,9 @@ class CallbackQueryHandler():
             listener['future'].set_result(update)
         else:
             if listener and listener['future'].done():
-                client.remove_callback_listener(
-                    chat_id=update.message.chat.id if update.message else None,
-                    msg_id=update.message.id if update.message else None,
-                    inline_message_id=update.inline_message_id,
-                    future=listener['future']
-                )
+                client.remove_result_listener(chat_id=update.message.chat.id if update.message else None,
+                                              msg_id=update.message.id if update.message else None,
+                                              inline_message_id=update.inline_message_id, future=listener['future'])
             await self.user_callback(client, update, *args)
 
     @patchable
