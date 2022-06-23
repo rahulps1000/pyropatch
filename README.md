@@ -62,11 +62,17 @@ from pyrogram import Client
 
 app = Client(...)
 # listen for a message in a particular chat
-m = app.listen_message(chat_id, filters, timeout)
+m = app.listen_message(chat_id=chat_id, filters=filters, timeout=timeout)
 
-# listen for a callback data in a perticular message
+# listen for a callback data in a particular message
 u = app.listen_callback(chat_id=chat_id, message_id=message_id, filters=filters, timeout=timeout)
 u = app.listen_callback(inline_message_id=inline_message_id, filters=filters, timout=timeout)
+
+# listen for an inline query 
+u = app.listen_inline_query(user_id=user_id, filters=filters, timeout=timeout)
+
+# listen for an inline result 
+u = app.listen_inline_result(user_id=user_id, filters=filters, timeout=timeout)
 ```
 
 #### More Comming Soon
