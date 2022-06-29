@@ -73,7 +73,7 @@ class InlineQueryHandler():
             listener['future'].set_result(update)
         else:
             if listener and listener['future'].done():
-                client.remove_result_listener(
+                client.remove_inline_listener(
                     user_id=update.from_user.id,
                     future=listener['future']
                 )

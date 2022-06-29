@@ -68,7 +68,7 @@ class MessageHandler():
             listener['future'].set_result(message)
         else:
             if listener and listener['future'].done():
-                client.clear_listener(message.chat.id, listener['future'])
+                client.remove_message_listener(message.chat.id, listener['future'])
             await self.user_callback(client, message, *args)
 
     @patchable
