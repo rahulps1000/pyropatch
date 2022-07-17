@@ -73,7 +73,7 @@ class Client():
         request = await self.send_message(chat_id, text, reply_markup=reply_markup, *args, **kwargs)
         response = await self.listen_callback(
             chat_id=request.chat.id,
-            message_id=request.id,
+            message_id=request.message_id,
             filters=filters,
             timeout=timeout
         )
@@ -132,7 +132,7 @@ class CallbackQueryHandler():
     @patchable
     async def resolve_listener(self, client, update, *args):
         if update.message:
-            key = f'{update.message.chat.id}:{update.message.id}'
+            key = f'{update.message.chat.id}:{update.message.message_id}'
         elif update.inline_message_id:
             key = update.inline_message_id
         else:
@@ -143,14 +143,14 @@ class CallbackQueryHandler():
         else:
             if listener and listener['future'].done():
                 client.remove_callback_listener(chat_id=update.message.chat.id if update.message else None,
-                                              msg_id=update.message.id if update.message else None,
+                                              msg_id=update.message.message_id if update.message else None,
                                               inline_message_id=update.inline_message_id, future=listener['future'])
             await self.user_callback(client, update, *args)
 
     @patchable
     async def check(self, client, update):
         if update.message:
-            key = f'{update.message.chat.id}:{update.message.id}'
+            key = f'{update.message.chat.id}:{update.message.message_id}'
         elif update.inline_message_id:
             key = update.inline_message_id
         else:

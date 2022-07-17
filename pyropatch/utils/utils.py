@@ -55,7 +55,7 @@ async def handle_flood_wait(func, *args, **kwargs):
     try:
         return await func(*args, **kwargs)
     except FloodWait as time:
-        await sleep(time.value)
+        await sleep(time.x)
         return await handle_flood_wait(func, *args, **kwargs)
 
 
