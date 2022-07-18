@@ -1,0 +1,4 @@
+import pyrogram
+from .inline_query_result_cached_document import *
+
+pyrogram.types.inline_mode.InlineQueryResultCachedDocument = InlineQueryResultCachedDocument
