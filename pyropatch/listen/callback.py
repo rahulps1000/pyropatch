@@ -48,7 +48,8 @@ class Client():
             msg = await self.get_messages(chat_id, message_id)
             if msg.from_user and not msg.from_user.is_self:
                 raise NotSelfMessage
-            if msg.sender_chat and not msg.chat.id==msg.sender_chat.id:
+            # For listening to a callback button in a channel's post
+            elif msg.sender_chat and not msg.chat.id == msg.sender_chat.id:
                 raise NotSelfMessage
             if not await check_cbd(msg.reply_markup):
                 raise NoCallbackException
