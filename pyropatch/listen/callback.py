@@ -46,7 +46,10 @@ class Client():
             if not message_id:
                 raise TypeError("message_id is required")
             msg = await self.get_messages(chat_id, message_id)
-            if not msg.from_user.is_self:
+            if msg.from_user and not msg.from_user.is_self:
+                raise NotSelfMessage
+            # For listening to a callback button in a channel's post
+            elif msg.sender_chat and not msg.chat.id == msg.sender_chat.id:
                 raise NotSelfMessage
             if not await check_cbd(msg.reply_markup):
                 raise NoCallbackException
