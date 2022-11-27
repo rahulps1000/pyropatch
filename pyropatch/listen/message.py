@@ -80,12 +80,9 @@ class MessageHandler():
     @patchable
     async def check(self, client, update):
         listener = client.msg_listeners.get(update.chat.id)
-
-        if listener and not listener['future'].done():
-            return await listener['filters'](client, update) if callable(listener['filters']) else True
-
-        return (
-            await self.filters(client, update)
-            if callable(self.filters)
-            else True
-        )
+        if self.checker:
+            if listener and not listener['future'].done():
+                return await listener['filters'](client, update) if callable(listener['filters']) else True
+        if callable(self.filters):
+            return await self.filters(client, update)
+        return True
