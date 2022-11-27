@@ -51,7 +51,13 @@ def new_command(commands: Union[str, List[str]], info: str = "", prefixes: Union
     command_re = re.compile(r"([\"'])(.*?)(?<!\\)\1|(\S+)")
 
     async def func(flt, client: Client, message: pyrogram.types.Message):
-        username = client.username or ""
+        try:
+            client.username
+        except AttributeError:
+            temp = await client.get_me()
+            client.username = temp.username
+        finally:
+            username = client.username or ""
         text = message.text or message.caption
         message.command = None
 

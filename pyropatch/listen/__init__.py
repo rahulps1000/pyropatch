@@ -24,6 +24,7 @@ class Client(Client):
 
     @patchable
     async def start(self, *args, **kwargs):
+        self.add_handler(pyrogram.handlers.MessageHandler(temp))
         self.add_handler(pyrogram.handlers.CallbackQueryHandler(temp))
         self.add_handler(pyrogram.handlers.InlineQueryHandler(temp))
         self.add_handler(pyrogram.handlers.ChosenInlineResultHandler(temp))
