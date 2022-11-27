@@ -128,7 +128,8 @@ class Client():
 @patch(pyrogram.handlers.callback_query_handler.CallbackQueryHandler)
 class CallbackQueryHandler():
     @patchable
-    def __init__(self, callback: callable, filters=None):
+    def __init__(self, callback: callable, filters=None, checker=False):
+        self.checker = checker
         self.user_callback = callback
         self.old___init__(self.resolve_listener, filters)
 
@@ -141,13 +142,16 @@ class CallbackQueryHandler():
         else:
             raise TypeError("chat_id or inline_message_id is required")
         listener = client.cbd_listeners.get(key)
-        if listener and not listener['future'].done():
-            listener['future'].set_result(update)
+        if self.checker:
+            if listener and not listener['future'].done():
+                listener['future'].set_result(update)
+                await self.user_callback(client, update, *args)
+            else:
+                if listener and listener['future'].done():
+                    client.remove_callback_listener(chat_id=update.message.chat.id if update.message else None,
+                                                msg_id=update.message.id if update.message else None,
+                                                inline_message_id=update.inline_message_id, future=listener['future'])
         else:
-            if listener and listener['future'].done():
-                client.remove_callback_listener(chat_id=update.message.chat.id if update.message else None,
-                                              msg_id=update.message.id if update.message else None,
-                                              inline_message_id=update.inline_message_id, future=listener['future'])
             await self.user_callback(client, update, *args)
 
     @patchable
@@ -159,12 +163,9 @@ class CallbackQueryHandler():
         else:
             raise TypeError("chat_id or inline_message_id is required")
         listener = client.cbd_listeners.get(key)
-
-        if listener and not listener['future'].done():
-            return await listener['filters'](client, update) if callable(listener['filters']) else True
-
-        return (
-            await self.filters(client, update)
-            if callable(self.filters)
-            else True
-        )
+        if self.checker:
+            if listener and not listener['future'].done():
+                return await listener['filters'](client, update) if callable(listener['filters']) else True
+        if callable(self.filters):
+            return await self.filters(client, update)
+        return True

@@ -57,20 +57,23 @@ class Client():
 @patch(pyrogram.handlers.message_handler.MessageHandler)
 class MessageHandler():
     @patchable
-    def __init__(self, callback: callable, filters=None):
+    def __init__(self, callback: callable, filters=None, checker=False):
+        self.checker = checker
         self.user_callback = callback
         self.old___init__(self.resolve_listener, filters)
 
     @patchable
     async def resolve_listener(self, client, message, *args):
         listener = client.msg_listeners.get(message.chat.id)
-        if listener and not listener['future'].done():
-            if (
-                await listener['filters'](client, message) 
-                if callable(listener['filters']) 
-                else True
-            ):
-                listener['future'].set_result(message)
+        if self.checker:
+            if listener and not listener['future'].done():
+                if (
+                    await listener['filters'](client, message) 
+                    if callable(listener['filters']) 
+                    else True
+                ):
+                    listener['future'].set_result(message)
+                    await self.user_callback(client, message, *args)
         else:
             await self.user_callback(client, message, *args)
 

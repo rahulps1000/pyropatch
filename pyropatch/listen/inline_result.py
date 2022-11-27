@@ -62,29 +62,30 @@ class Client():
 @patch(pyrogram.handlers.chosen_inline_result_handler.ChosenInlineResultHandler)
 class ChosenInlineResultHandler():
     @patchable
-    def __init__(self, callback: callable, filters=None):
+    def __init__(self, callback: callable, filters=None, checker=False):
+        self.checker = checker
         self.user_callback = callback
         self.old___init__(self.resolve_listener, filters)
 
     @patchable
     async def resolve_listener(self, client, update, *args):
         listener = client.result_listeners.get(str(update.from_user.id))
-        if listener and not listener['future'].done():
-            listener['future'].set_result(update)
+        if self.checker:
+            if listener and not listener['future'].done():
+                listener['future'].set_result(update)
+                await self.user_callback(client, update, *args)
+            else:
+                if listener and listener['future'].done():
+                    client.remove_result_listener(user_id=update.from_user.id, future=listener['future'])
         else:
-            if listener and listener['future'].done():
-                client.remove_result_listener(user_id=update.from_user.id, future=listener['future'])
             await self.user_callback(client, update, *args)
 
     @patchable
     async def check(self, client, update):
         listener = client.result_listeners.get(str(update.from_user.id))
-
-        if listener and not listener['future'].done():
-            return await listener['filters'](client, update) if callable(listener['filters']) else True
-
-        return (
-            await self.filters(client, update)
-            if callable(self.filters)
-            else True
-        )
+        if self.checker:
+            if listener and not listener['future'].done():
+                return await listener['filters'](client, update) if callable(listener['filters']) else True
+        if callable(self.filters):
+            return await self.filters(client, update)
+        return True

@@ -9,7 +9,7 @@ from ..utils import patch2, patchable
 
 
 async def temp(_: Client, update: Update):
-    update.continue_propagation()
+    update.stop_propagation()
 
 
 @patch2(pyrogram.client.Client)
@@ -24,8 +24,8 @@ class Client(Client):
 
     @patchable
     async def start(self, *args, **kwargs):
-        self.add_handler(pyrogram.handlers.MessageHandler(temp))
-        self.add_handler(pyrogram.handlers.CallbackQueryHandler(temp))
-        self.add_handler(pyrogram.handlers.InlineQueryHandler(temp))
-        self.add_handler(pyrogram.handlers.ChosenInlineResultHandler(temp))
+        self.add_handler(pyrogram.handlers.MessageHandler(temp, checker=True), group=-100)
+        self.add_handler(pyrogram.handlers.CallbackQueryHandler(temp, checker=True), group=-100)
+        self.add_handler(pyrogram.handlers.InlineQueryHandler(temp, checker=True), group=-100)
+        self.add_handler(pyrogram.handlers.ChosenInlineResultHandler(temp, checker=True), group=-100)
         await self.old2_start(*args, **kwargs)
