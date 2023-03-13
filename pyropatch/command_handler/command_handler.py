@@ -3,7 +3,7 @@ from typing import List, Union
 
 import pyrogram
 
-from ..utils import patch, patchable, get_commands_from_filters
+from ..utils import patch, patch2, patchable, get_commands_from_filters
 
 
 @patch(pyrogram.client.Client)
@@ -20,14 +20,15 @@ class Client():
             cmd_list.append(pyrogram.types.BotCommand(command=cmd, description=info))
         return await self.set_bot_commands(cmd_list)
 
+@patch2(pyrogram.handlers.message_handler.MessageHandler)
+class MessageHandler():
     @patchable
     def on_message(self, filters=None, *args, **kwargs):
         cmd_list = get_commands_from_filters(filters)
         if cmd_list:
             for cmd in cmd_list:
                 self.commands.update(cmd)
-        return self.old_on_message(filters, *args, **kwargs)
-
+        return self.old2_on_message(filters, *args, **kwargs)
 
 def new_command(commands: Union[str, List[str]], info: str = "", prefixes: Union[str, List[str]] = "/",
                 case_sensitive: bool = False):
