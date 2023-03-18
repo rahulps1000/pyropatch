@@ -34,6 +34,7 @@ class AddHandler():
             if cmd_list:
                 for cmd in cmd_list:
                     self.commands.update(cmd)
+
         return self.old_add_handler(handler, group)
 
 
