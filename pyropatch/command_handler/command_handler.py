@@ -20,15 +20,22 @@ class Client():
             cmd_list.append(pyrogram.types.BotCommand(command=cmd, description=info))
         return await self.set_bot_commands(cmd_list)
 
-@patch2(pyrogram.handlers.message_handler.MessageHandler)
-class MessageHandler():
+
+@patch(pyrogram.methods.utilities.add_handler.AddHandler)
+class AddHandler():
     @patchable
-    def on_message(self, filters=None, *args, **kwargs):
-        cmd_list = get_commands_from_filters(filters)
-        if cmd_list:
-            for cmd in cmd_list:
-                self.commands.update(cmd)
-        return self.old2_on_message(filters, *args, **kwargs)
+    def add_handler(
+            self: "pyrogram.Client",
+            handler: "Handler",
+            group: int = 0
+    ):
+        if isinstance(handler, pyrogram.handlers.MessageHandler):
+            cmd_list = get_commands_from_filters(handler.filters)
+            if cmd_list:
+                for cmd in cmd_list:
+                    self.commands.update(cmd)
+        return self.old_add_handler(handler, group)
+
 
 def new_command(commands: Union[str, List[str]], info: str = "", prefixes: Union[str, List[str]] = "/",
                 case_sensitive: bool = False):
