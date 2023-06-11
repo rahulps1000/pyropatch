@@ -3,7 +3,7 @@ from typing import List, Union
 
 import pyrogram
 
-from ..utils import patch, patchable, get_commands_from_filters
+from ..utils import patch, patch2, patchable, get_commands_from_filters
 
 
 @patch(pyrogram.client.Client)
@@ -20,13 +20,22 @@ class Client():
             cmd_list.append(pyrogram.types.BotCommand(command=cmd, description=info))
         return await self.set_bot_commands(cmd_list)
 
+
+@patch(pyrogram.methods.utilities.add_handler.AddHandler)
+class AddHandler():
     @patchable
-    def on_message(self, filters=None, *args, **kwargs):
-        cmd_list = get_commands_from_filters(filters)
-        if cmd_list:
-            for cmd in cmd_list:
-                self.commands.update(cmd)
-        return self.old_on_message(filters, *args, **kwargs)
+    def add_handler(
+            self: "pyrogram.Client",
+            handler: "Handler",
+            group: int = 0
+    ):
+        if isinstance(handler, pyrogram.handlers.MessageHandler):
+            cmd_list = get_commands_from_filters(handler.filters)
+            if cmd_list:
+                for cmd in cmd_list:
+                    self.commands.update(cmd)
+
+        return self.old_add_handler(handler, group)
 
 
 def new_command(commands: Union[str, List[str]], info: str = "", prefixes: Union[str, List[str]] = "/",
@@ -51,7 +60,13 @@ def new_command(commands: Union[str, List[str]], info: str = "", prefixes: Union
     command_re = re.compile(r"([\"'])(.*?)(?<!\\)\1|(\S+)")
 
     async def func(flt, client: Client, message: pyrogram.types.Message):
-        username = client.username or ""
+        try:
+            client.username
+        except AttributeError:
+            temp = await client.get_me()
+            client.username = temp.username
+        finally:
+            username = client.username or ""
         text = message.text or message.caption
         message.command = None
 
